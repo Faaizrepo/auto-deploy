@@ -1,0 +1,29 @@
+pipeline {
+  agent any
+
+  stages {
+    stage('Clone Code') {
+      steps {
+        git branch: 'main',
+            credentialsId: 'github-creds',
+            url: 'https://github.com/Faaizrepo/auto-deploy.git'
+      }
+    }
+
+    stage('Build Docker Image') {
+      steps {
+        sh 'docker build -t webapp:latest .'
+      }
+    }
+
+    stage('Deploy Container') {
+      steps {
+        sh '''
+          docker stop web || true
+          docker rm web || true
+          docker run -d -p 80:80 --name web webapp:latest
+        '''
+      }
+    }
+  }
+}
